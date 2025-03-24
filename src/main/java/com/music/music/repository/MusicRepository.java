@@ -24,6 +24,9 @@ public class MusicRepository {
         Music m4 = new Music(4, "Metallica", "Master of Puppets");
         musicList.add(m4);
 
+        Music m5 = new Music(5, "Ozzy Osbourne", "Bark at the moon");
+        musicList.add(m5);
+
         return musicList;
     }
 
