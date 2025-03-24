@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Clone the repository') {
             steps {
-               git branch: 'main' url: 'https://github.com/piterrivero/music.git'
+               git branch: 'main', url: 'https://github.com/piterrivero/music.git'
             }
         }
         stage('Build the maven code') {
