@@ -1,13 +1,50 @@
-// Run a Jenkins container
-docker run --name jenkins-blueocean --restart=on-failure --detach ^
-  --network jenkins --env DOCKER_HOST=tcp://docker:2376 ^
-  --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 ^
-  --volume jenkins-data:/var/jenkins_home ^
-  --volume jenkins-docker-certs:/certs/client:ro ^
-  --publish 8080:8080 --publish 50000:50000 myjenkins-blueocean:2.492.2-1
+// Install jenkins container
+// https://github.com/devopsjourney1/jenkins-101/tree/master
+
+- Download Jenkins docker image
+
+Create a Dockerfile with this (Before prepared for anyone):
+
+FROM jenkins/jenkins:2.492.2-jdk17
+USER root
+RUN apt-get update && apt-get install -y lsb-release python3-pip
+RUN curl -fsSLo /usr/share/keyrings/docker-archive-keyring.asc \
+  https://download.docker.com/linux/debian/gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) \
+  signed-by=/usr/share/keyrings/docker-archive-keyring.asc] \
+  https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+RUN apt-get update && apt-get install -y docker-ce-cli
+USER jenkins
+RUN jenkins-plugin-cli --plugins "blueocean:latest docker-workflow:1.28"
+
+Build the docker image with:
+
+ docker build -t myjenkins-blueocean:latest .
+
+- Create network
+
+docker network create Jenkins
+
+- Run Jenkins container
+
+docker run --name jenkins-blueocean --restart=on-failure --detach `
+  --network jenkins --env DOCKER_HOST=tcp://docker:2376 `
+  --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 `
+  --volume jenkins-data:/var/jenkins_home `
+  --volume jenkins-docker-certs:/certs/client:ro `
+  --publish 8080:8080 --publish 50000:50000 myjenkins-blueocean:latest
+
+- Get the password to unblock Jenkins
+
+docker exec jenkins-blueocean cat /var/jenkins_home/secrets/initialAdminPassword
+
+- Go to localhost:8080 and unblock jenkins
+
+:::::::::::::::::::::::: Other Docker Commands ::::::::::::::::::
 
 // Run a tomcat container
-docker run -d -p 5050:5050 --name tomcat10 tomcat:10.1-jdk17
+docker run -d -p 5050:5050 --network jenkins --name tomcat10 tomcat:10.1-jdk17
 
 // See all the containers
 docker ps
