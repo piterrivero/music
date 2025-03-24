@@ -4,30 +4,28 @@ pipeline {
             label 'docker-agent-alpine'
             }
       }
+      tools{
+              maven 'maven-3.9.9'
+          }
+      options {
+          buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '5', numToKeepStr: '2')
+      }
     stages {
-        stage('Build') {
+        stage('Clone the repository') {
             steps {
-                echo "Building.."
-                sh '''
-                echo "doing build stuff.."
-                '''
+               git url: 'https://github.com/piterrivero/music.git'
             }
         }
-        stage('Test') {
+        stage('Build the maven code') {
             steps {
-                echo "Testing.."
-                sh '''
-                echo "doing test stuff.."
-                '''
+                sh 'mvn clean install'
             }
         }
-        stage('Deliver') {
-            steps {
-                echo 'Deliver....'
-                sh '''
-                echo "doing delivery stuff.."
-                '''
-            }
+        stage('Deploy to tomcat') {
+                steps {
+                deploy adapters: [tomcat9(credentialsId: 'tomcat', path: '', url: 'http://172.18.0.4:5050')], contextPath: null, war: '**/*.war'
+                     }
         }
+
     }
 }
