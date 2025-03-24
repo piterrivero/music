@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/music")
+//@RequestMapping("/music")
 public class MusicController {
 
     private final MusicService musicService;
